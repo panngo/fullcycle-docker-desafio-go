@@ -1,0 +1,41 @@
+version: "3.6"
+
+services:
+  app-nginx:
+    build:
+      context: nginx
+    container_name: app_nginx
+    networks:
+      -  app-network
+    ports:
+      - "8080:8080"
+    depends_on: 
+      - app-node
+
+  app-node:
+    build:
+      context: node
+    container_name: app_node
+    networks:
+      - app-network
+    depends_on:
+      - app_db
+
+  app_db:
+    user: "${UID}:${GID}"
+    image: mysql:5.7
+    command: --innodb-use-native-aio=0
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    container_name: app_db
+    restart: always
+    tty: true
+    environment: 
+      - MYSQL_DATABASE=peopledb
+      - MYSQL_ROOT_PASSWORD=root
+    networks: 
+      - app-network
+
+networks: 
+  app-network:
+    driver: bridge  
