@@ -8,7 +8,7 @@ services:
     networks:
       -  app-network
     ports:
-      - "8080:8080"
+      - "8080:80"
     depends_on: 
       - app-node
 
@@ -16,8 +16,10 @@ services:
     build:
       context: node
     container_name: app_node
+    entrypoint: dockerize -wait tcp://app_db:3306 -timeout 20s docker-entrypoint.sh node index
     networks:
       - app-network
+    tty: true
     depends_on:
       - app_db
 
